@@ -39,9 +39,7 @@
             // cached data:
             //   - The start data points to a remote (e.g. Visualforce) application.
             //   - The start data points to a local application, but authentication is required for that app.
-            //var isDeviceOnline = SFHybridApp.deviceIsOnline();
-            var isDeviceOnline = true;
-            
+            var isDeviceOnline = SFHybridApp.deviceIsOnline();
             if (!isDeviceOnline &&
                 ((startData instanceof SFHybridApp.RemoteAppStartData)
                   || startData.shouldAuthenticate)) {

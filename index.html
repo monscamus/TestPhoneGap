@@ -1,114 +1,135 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-
-    <!-- include jquery mobile -->
-    <link rel="stylesheet" href="jquery/jquery.mobile-1.0b2.min.css" />
-    <script src="jquery/jquery-1.6.2.min.js"></script>
-    <script src="jquery/jquery.mobile-1.0b2.min.js"></script>
-        
-    <!-- include phonegap / callback -->
-	<script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
-    <!-- required for oauth plugin support -->    
-    <script type="text/javascript" src="SalesforceOAuthPlugin.js"></script>
-
-    <!-- include forcetk for REST transaction support -->
-    <script src="forcetk.js"></script>
-    
-    <!-- include local utility functionality -->
-    <link rel="stylesheet" type="text/css" href="SFHybridApp.css" />
-    <script type="text/javascript" charset="utf-8" src="SFHybridApp.js"></script>
-
-    <script type="text/javascript" charset="utf-8">
-
-    
-    // The version of the REST API you wish to use in your app.
-    var apiVersion = "v23.0";
-
-	// If you want to prevent dragging, uncomment this section
-	/*
-	function preventBehavior(e) 
-	{ 
-      e.preventDefault(); 
-    };
-	document.addEventListener("touchmove", preventBehavior, false);
-	*/
-	
-	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
-	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
-	for more details -jm */
-	/*
-	function handleOpenURL(url)
-	{
-		// do something with the url passed in.
-	}
-	*/
-	
-    var forcetkClient;
-    var debugMode = true;
-
-    jQuery(document).ready(function() {
-        //Add event listeners and so forth here
-        SFHybridApp.logToConsole("onLoad: jquery ready");
-		document.addEventListener("deviceready", onDeviceReady,false);
-
-    });
-
-    // When this function is called, PhoneGap has been initialized and is ready to roll 
-    function onDeviceReady() {
-        SFHybridApp.logToConsole("onDeviceReady: PhoneGap ready");
-		//Call getAuthCredentials to get the initial session credentials
-        SalesforceOAuthPlugin.getAuthCredentials(salesforceSessionRefreshed, getAuthCredentialsError);
-
-        //register to receive notifications when autoRefreshOnForeground refreshes the sfdc session
-        document.addEventListener("salesforceSessionRefresh",salesforceSessionRefreshed,false);
-
-        //enable buttons
-        regLinkClickHandlers();
-    }
-        
-
-    function salesforceSessionRefreshed(creds) {
-        SFHybridApp.logToConsole("salesforceSessionRefreshed");
-		
-        forcetkClient = new forcetk.Client(creds.clientId, creds.loginUrl);
-        forcetkClient.setSessionToken(creds.accessToken, apiVersion, creds.instanceUrl);
-        forcetkClient.setRefreshToken(creds.refreshToken);
-        forcetkClient.setUserAgentString(creds.userAgent);
-    }
-
-
-    function getAuthCredentialsError(error) {
-        SFHybridApp.logToConsole("getAuthCredentialsError: " + error);
-    }
-        
-    </script>
-        
-	<!-- load our app-specific code -->
-    <script src="inline.js"></script>       
-
-  </head>
-  <body>
-      <div data-role="page" data-theme="b" id="jqm-home"> 
-          <div  data-role="header"> 
-              <h1>Inspector</h1> 
-          </div> 
-
-          <div id="#content" data-role="content"> 
-
-              <p><a href="#" id="link_fetch_inspections" data-role="button" data-inline="true">Fetch Inspections</a></p>
-              <p><a href="#" id="link_reset" data-role="button" data-inline="true">Reset</a></p>
-              <p><a href="#" id="link_logout" data-role="button" data-inline="true">Logout</a></p>
-
-              <div id="div_inspection_list"></div>
-
-              <h3>console:</h3>
-              <p id="console" class="logWindow">
-              </p>
-          </div> 
-
-      </div> 
-  </body>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Inspector</title>
+<!-- STYLES -->		
+		<link rel="stylesheet" type="text/css" href="jquery/jquery.mobile-1.0b2.min.css" />
+		<link rel="stylesheet" type="text/css" href="my.css" />
+		<link rel="stylesheet" type="text/css" href="mobiscroll/mobiscroll-2.0.custom.min.css" />
+		<link rel="stylesheet" type="text/css" href="SFHybridApp.css" />
+<!-- SCRIPTS -->		
+		<script type="text/javascript" charset="utf-8" src="jquery/jquery-1.6.2.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="jquery/jquery.mobile-1.0b2.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="https://maps.googleapis.com/maps/api/js?sensor=true"></script>
+		<script type="text/javascript" charset="utf-8" src="date.format.js"></script>
+		<script type="text/javascript" charset="utf-8" src="phonegap-1.2.0.js"></script>
+		<script type="text/javascript" charset="utf-8" src="SalesforceOAuthPlugin.js"></script>
+		<script type="text/javascript" charset="utf-8" src="forcetk.js"></script>
+		<script type="text/javascript" charset="utf-8" src="mobiscroll/mobiscroll-2.0.custom.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="SFHybridApp.js"></script>
+		<script type="text/javascript" charset="utf-8" src="start.js"></script>
+		<script type="text/javascript" charset="utf-8" src="inline.js"></script>	   
+	</head>
+	<body>
+<!-- PAGE 1 -->	
+		<div data-role="page" id="page1">
+			<div data-theme="b" data-role="header">
+				<h2>Inspector</h2>
+			</div>
+			<div data-role="content">
+				<div id="div_inspection_list"></div>			
+				<h3>console:</h3>
+		  		<p id="console" class="logWindow"></p>
+			</div>
+		</div>
+<!-- PAGE 2 -->		
+		<div data-role="page" id="page2">
+			<div data-theme="b" data-role="header">
+				<h2>Inspection Details</h2>
+			</div>
+			<div data-role="content">
+				<div class="ui-grid-a">
+					<div class="ui-block-a">		  			
+							<h3>Details</h3>
+							<form action="#page1" method="post">
+								<div data-role="fieldcontain">
+									<fieldset data-role="controlgroup">
+										<label for="txtstart" data-mini="true">Visit Started</label>
+										<input id="txtstart" data-mini="true" placeholder="" value="" style="width:140px" type="text" /> <button id="btnstart" data-inline="true">Start</button>
+									</fieldset>
+								</div>
+								<div data-role="fieldcontain">
+									<fieldset data-role="controlgroup">
+										<label for="txtend">Visit Ended</label>
+										<input id="txtend" placeholder="" value="" type="text" style="width:140px" /> <button id="btnend" data-inline="true">End</button>
+									</fieldset>
+								</div>
+								<div data-role="fieldcontain">
+									<label for="select-choice-0" class="select">Outcome:</label>
+									<select name="select-choice-0" id="select-choice-1">
+										<option value="Approved">Approved</option>
+										<option value="Deferred">Deferred</option>
+										<option value="Rejected">Rejected</option>
+										<option value="Skipped">Skipped</option>
+										<option value="Defect">Defect</option>
+										<option value="No Access">No Access</option>
+									</select>
+								</div>
+								<button id="btnqnotes" data-theme="b" data-mini="true">Notes</button>
+								<button id="btnsave" data-theme="b" data-mini="true">Save</button>
+								<button id="btnpicture" data-theme="b" data-mini="true">Picture</button>
+								<button id="btnmap" data-theme="b" data-mini="true">Map</button>
+								<button id="btnback" data-theme="a" data-mini="true">Back</button>
+							</form>
+						</div>
+						<div class="ui-block-b">
+	  						<div id="applicant"></div>
+	  						<div id="agent"></div>
+	  						<div id="bcapplication"></div>
+	  						<div id="notes"></div>
+							<div id="div_old_inspection_list"></div>
+							<h3>console:</h3>
+  							<p id="console" class="logWindow"></p>
+						</div>
+					</div><!-- /grid-a -->
+				</div>
+			</div>
+<!-- PAGE MAP -->		
+			<div data-role="page" id="pageMap">
+				<div data-theme="b" data-role="header">
+					<h2>Map</h2>
+				</div>
+				<div data-role="content">
+					<button id="btnbackmap" data-mini="true">Back</button>
+					<div id="mymap"></div>
+				</div>			
+			</div>
+<!-- PAGE PHOTO -->		
+			<div data-role="page" id="pagePhoto">
+				<div data-theme="b" data-role="header">
+					<h2>Photo</h2>
+				</div>
+				<div data-role="content" id="myPhotoHolder">
+					<button id="btnbackphoto" data-mini="true">Back</button>
+					<button id="btntakephoto" data-mini="true">Take Photo</button>
+				</div>			
+			</div>
+<!-- PAGE NOTES -->		
+			<div data-role="page" class="ui-grid-a" id="pageNotes">
+				<div data-theme="b" data-role="header">
+					<h2>Notes</h2>
+				</div>
+				<div class="ui-block-a">
+				<h3 style="text-align:center">Select notes or enter text</h3>
+					<div class="pagelook" style="text-align:center;">
+						<textarea id="Textbin" style="height:400px"> </textarea>
+					</div>			
+				</div>
+				<div class="ui-block-b pagelook" id = "Origin" >
+				    <h3 style="text-align:center">Quick Notes</h3>
+				    <div class="pagelook">
+						<span class="draggable taglook">Foundations require re-inspection.</span>
+						<span class="draggable taglook">Beware the Dog!</span>
+	        	    	<span class="draggable taglook">Roof is crumbling.</span>
+	    	        	<span class="draggable taglook">Area in plot is incorrect.</span>
+		            	<span class="draggable taglook">Neighbours need to clear before demolition starts.</span>
+		            	<button id="btnnotesback" style="bottom: 20px;">Done</button>
+            		</div>
+       			</div> 
+			</div>
+<!-- PAGE ENDS -->		
+		</div>
+	</body>
 </html>

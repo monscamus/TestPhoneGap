@@ -124,12 +124,6 @@ loadUrl: function(fullAppUrl) {
  */
 deviceIsOnline: function() {
     var connType;
-
-        SFHybridApp.logToConsole("deviceIsOnline connType: HACKED");
-        
-        return true;
-
-
     if (navigator && navigator.network && navigator.network.connection) {
         connType = navigator.network.connection.type;
         SFHybridApp.logToConsole("deviceIsOnline connType: " + connType);

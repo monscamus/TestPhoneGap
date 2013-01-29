@@ -4,3 +4,31 @@
 .text-align-right {
   text-align: right;
 }
+
+.bignav {
+	font-size: 18pt;
+}
+
+.console {
+	display: none;
+}
+
+#mymap {
+	height: 400px;
+}
+.taglook{	
+	text-align:left;
+	background-color:#bbbbee;
+	-moz-border-radius: 15px;
+		 border-radius: 15px;
+	padding: 5px;
+	margin-right: 5px;
+	display: inline-block;
+	margin-bottom: 10px;
+	font-weight:bold;
+}
+.pagelook {
+	height:95%;
+	width: 97%;	
+	text-align: left;
+}
